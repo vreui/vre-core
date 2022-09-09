@@ -11,6 +11,10 @@ repository = "https://github.com/vreui/vre-core"
 [dependencies]
 env_logger = "^0.9.0"
 glutin = "^0.29.1"
+euclid = "^0.22.7"
+
+# gleam 版本必须与 webrender 的依赖保持一致
+gleam = "0.13.1"
 # TODO
 winit = "^0.27.2"
 
