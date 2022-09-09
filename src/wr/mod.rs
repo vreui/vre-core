@@ -14,7 +14,6 @@ use webrender::{DebugCommand, DebugFlags, Renderer, WebRenderOptions};
 use euclid::{Scale, Size2D};
 use gleam::gl;
 
-// TODO
 use winit::event_loop::EventLoopProxy;
 
 pub struct 通知器 {

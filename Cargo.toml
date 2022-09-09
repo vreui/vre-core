@@ -10,13 +10,14 @@ repository = "https://github.com/vreui/vre-core"
 
 [dependencies]
 env_logger = "^0.9.0"
-glutin = "^0.29.1"
 euclid = "^0.22.7"
+
+# tao (gtk) 无法正常运行 (启动崩溃), 只能使用 winit
+glutin = "^0.29.1"
+winit = "^0.27.2"
 
 # gleam 版本必须与 webrender 的依赖保持一致
 gleam = "0.13.1"
-# TODO
-winit = "^0.27.2"
 
 [dependencies.webrender]
 git = "https://github.com/servo/webrender.git"

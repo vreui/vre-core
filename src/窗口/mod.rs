@@ -5,7 +5,6 @@ use glutin::{ContextBuilder, GlRequest, NotCurrent, WindowedContext};
 
 use webrender::api::ColorF;
 
-// TODO
 use winit::dpi::LogicalSize;
 use winit::event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
