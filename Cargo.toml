@@ -1,0 +1,33 @@
+[package]
+name = "vrecore"
+version = "0.1.0"
+edition = "2021"
+authors = ["sceext <sceext@foxmail.com>"]
+license = "MPL-2.0"
+repository = "https://github.com/vreui/vre-core"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+env_logger = "^0.9.0"
+glutin = "^0.29.1"
+# TODO
+winit = "^0.27.2"
+
+[dependencies.webrender]
+git = "https://github.com/servo/webrender.git"
+version = "0.62.0"
+
+[features]
+# 默认为桌面平台
+default = ["dt"]
+
+# Android 平台
+apk = []
+# 桌面平台 (GNU/Linux)
+dt = []
+# web 平台
+web = []
+
+# 调试
+debug = ["webrender/capture", "webrender/profiler"]
