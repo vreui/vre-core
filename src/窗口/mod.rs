@@ -6,9 +6,8 @@ use glutin::{ContextBuilder, GlRequest, NotCurrent, WindowedContext};
 use webrender::api::ColorF;
 
 use winit::dpi::LogicalSize;
-use winit::event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent};
-use winit::event_loop::{ControlFlow, EventLoop};
-use winit::platform::run_return::EventLoopExtRunReturn;
+use winit::event::{Event, WindowEvent};
+use winit::event_loop::EventLoop;
 use winit::window::WindowBuilder;
 
 use super::wr::{初始化wr, 渲染数据, 通知器};
@@ -21,22 +20,23 @@ const 请求GL: GlRequest = GlRequest::GlThenGles {
 
 pub struct 窗 {
     名称: &'static str,
-    事件循环: EventLoop<()>,
+    事件循环: Option<EventLoop<()>>,
     语境: Option<WindowedContext<NotCurrent>>,
 
-    wr: 渲染数据,
+    wr: Option<渲染数据>,
 }
 
 impl 窗 {
     /// 创建窗口
     #[allow(unsafe_code)]
     pub fn new(名称: &'static str, 窗口大小: (f64, f64), 背景色: ColorF) -> Self {
+        // TODO 事件循环 可以在多个窗口之间共享
+        let 事件循环 = EventLoop::new();
+
         // 创建窗口
         let 窗口构造器 = WindowBuilder::new()
             .with_title(名称)
             .with_inner_size(LogicalSize::new(窗口大小.0, 窗口大小.1));
-
-        let 事件循环 = EventLoop::new();
         // 请求 OpenGL / OpenGL ES
         let 语境 = ContextBuilder::new()
             .with_gl(请求GL)
@@ -70,24 +70,65 @@ impl 窗 {
 
         Self {
             名称,
-            事件循环,
+            事件循环: Some(事件循环),
             语境: Some(语境),
-            wr,
+            wr: Some(wr),
         }
     }
 
-    // 销毁
-    pub fn 清理(self) {
-        self.wr.销毁();
+    pub fn 主循环(mut self) -> ! {
+        let 事件循环 = self.事件循环.take().unwrap();
+        let mut 自己 = self;
+        let mut 需要重绘 = false;
+
+        事件循环.run(move |事件, _目标, 控制流| {
+            //控制流.set_poll();
+            控制流.set_wait();
+
+            match 事件 {
+                Event::WindowEvent { event, .. } => match event {
+                    WindowEvent::CloseRequested => {
+                        println!("退出");
+                        控制流.set_exit();
+                    }
+                    WindowEvent::Resized(_) => {
+                        需要重绘 = true;
+                    }
+                    _ => {}
+                },
+                Event::MainEventsCleared => {
+                    if 需要重绘 {
+                        需要重绘 = false;
+                        自己.请求渲染();
+                    }
+                }
+                Event::RedrawRequested(_) => {
+                    let mut wr = 自己.wr.take().unwrap();
+                    自己.渲染(&mut wr);
+                    自己.wr = Some(wr);
+                }
+                Event::LoopDestroyed => {
+                    // 清理
+                    自己.wr.take().unwrap().销毁();
+                }
+                _ => {}
+            }
+        });
     }
 
     #[allow(unsafe_code)]
-    pub fn 主循环(&mut self) -> bool {
-        if self.处理事件循环() {
-            // 退出
-            return true;
-        }
+    fn 请求渲染(&mut self) {
+        // 当前语境
+        let 语境 = unsafe { self.语境.take().unwrap().make_current().unwrap() };
 
+        语境.window().request_redraw();
+
+        // 非当前语境
+        self.语境 = Some(unsafe { 语境.make_not_current().unwrap() });
+    }
+
+    #[allow(unsafe_code)]
+    fn 渲染(&mut self, wr: &mut 渲染数据) {
         // 当前语境
         let 语境 = unsafe { self.语境.take().unwrap().make_current().unwrap() };
 
@@ -97,45 +138,12 @@ impl 窗 {
         };
         let 像素比例 = 语境.window().scale_factor() as f32;
 
-        self.wr.渲染(窗口大小, 像素比例);
+        println!("DEBUG: 窗口大小 {:?}  像素比例 {:?}", 窗口大小, 像素比例);
+
+        wr.渲染(窗口大小, 像素比例);
 
         语境.swap_buffers().ok();
         // 非当前语境
         self.语境 = Some(unsafe { 语境.make_not_current().unwrap() });
-
-        false
-    }
-
-    fn 处理事件循环(&mut self) -> bool {
-        let 名称 = &self.名称;
-        let mut 退出标志 = false;
-        let wr = &mut self.wr;
-
-        self.事件循环.run_return(|全局事件, _elwt, 控制流| {
-            *控制流 = ControlFlow::Exit;
-
-            match 全局事件 {
-                Event::WindowEvent { event, .. } => match event {
-                    WindowEvent::CloseRequested => {
-                        退出标志 = true;
-                    }
-                    WindowEvent::KeyboardInput {
-                        input:
-                            KeyboardInput {
-                                state: ElementState::Pressed,
-                                virtual_keycode: Some(VirtualKeyCode::P),
-                                ..
-                            },
-                        ..
-                    } => {
-                        wr.调试p(名称);
-                    }
-                    _ => {}
-                },
-                _ => {}
-            }
-        });
-
-        退出标志
     }
 }

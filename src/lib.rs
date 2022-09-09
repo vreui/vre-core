@@ -6,8 +6,6 @@ extern crate euclid;
 extern crate gleam;
 extern crate glutin;
 extern crate webrender;
-
-// TODO
 extern crate winit;
 
 // 模块
@@ -39,18 +37,12 @@ pub fn 启动引擎() {
     // TODO
     println!("vrecore::启动引擎");
 
-    let mut 窗口1 = 窗::new(
+    let 窗口1 = 窗::new(
         "测试1",
         (1280.0 as f64, 720.0 as f64),
         ColorF::new(0.0, 0.0, 0.3, 1.0),
     );
 
     println!("进入主循环");
-    loop {
-        if 窗口1.主循环() {
-            break;
-        }
-    }
-
-    窗口1.清理();
+    窗口1.主循环();
 }

@@ -68,6 +68,8 @@ impl 渲染数据 {
         let 设备大小 = DeviceIntSize::new(窗口大小.0, 窗口大小.1);
         let 布局大小 = 设备大小.to_f32() / Scale::new(像素比例);
 
+        println!("DEBUG: 设备大小 {:?}  布局大小 {:?}", 设备大小, 布局大小);
+
         let mut 事务 = Transaction::new();
 
         let mut 构 = self.构造显示列表(布局大小);
