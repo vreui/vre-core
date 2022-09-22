@@ -6,8 +6,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 大约用时 15 分钟
-    timeout-minutes: 30
+    # 大约用时 20 分钟
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
 
@@ -20,18 +20,24 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: wasm32-unknown-unknown
+          #target: wasm32-unknown-unknown
           components: rustfmt, clippy
       - run: cargo --version
 
-      # # wasm-gc
-      # - run: cargo install wasm-gc
-      # - run: type wasm-gc
-
       # 主要编译过程 (检查, 测试, 编译)
       - run: cargo fmt --check
-      - run: cargo test
+      - run: cargo test --all-features
+
+      # default cargo features
       - run: cargo build --release
+      # feature: api
+      - run: cargo build --release --no-default-features --features api
+      # feature: server
+      - run: cargo build --release --no-default-features --features server
+      # feature: window
+      - run: cargo build --release --no-default-features --features window
+      # all cargo features
+      - run: cargo build --release --all-features
 
       # 上传编译结果
       - uses: actions/upload-artifact@v2

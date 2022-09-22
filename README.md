@@ -29,6 +29,28 @@
   ```
 
 
+## cargo features
+
++ `api` (默认启用)
+
+  仅用于跨越 wasm 的接口.
+  (`vre-ui` 使用)
+
++ `server` (依赖 `api`, 默认启用)
+
+  服务进程.
+  主要包含组件 `wasmer`.
+
++ `window`
+
+  窗口进程.
+  主要包含组件 `WebRender`, `glw`.
+
++ `wr_debug` (依赖 `window`)
+
+  用于 WebRender 调试.
+
+
 ## LICENSE
 
 `Mozilla Public License 2.0`

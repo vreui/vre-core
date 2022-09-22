@@ -9,30 +9,38 @@ repository = "https://github.com/vreui/vre-core"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-env_logger = "^0.9.0"
-euclid = "^0.22.7"
+env_logger = "^0.9.1"
 
-# tao (gtk) 无法正常运行 (启动崩溃), 只能使用 winit
-glutin = "^0.29.1"
-winit = "^0.27.2"
+# wasmer
+wasmer = { version = "2.3.0", optional = true }
+wasmer-compiler-cranelift = { version = "2.3.0", optional = true }
+wasmer-compiler-llvm = { version = "2.3.0", optional = true }
 
+# 用于 WebRender
+euclid = { version = "^0.22.7", optional = true }
 # gleam 版本必须与 webrender 的依赖保持一致
-gleam = "0.13.1"
+gleam = { version = "0.13.1", optional = true }
 
 [dependencies.webrender]
 git = "https://github.com/servo/webrender.git"
 version = "0.62.0"
+optional = true
+
+[dependencies.glw]
+#git = "https://github.com/vreui/glw.git"
+path = "../glw"
+version = "0.1.0"
+optional = true
 
 [features]
-# 默认为桌面平台
-default = ["dt"]
+default = ["api", "server"]
 
-# Android 平台
-apk = []
-# 桌面平台 (GNU/Linux)
-dt = []
-# web 平台
-web = []
+# 用于跨越 wasm 的接口
+api = []
+# 服务进程 (依赖 api)
+server = ["api", "wasmer", "wasmer-compiler-cranelift", "wasmer-compiler-llvm"]
+# 窗口进程
+window = ["glw", "webrender", "gleam", "euclid"]
 
-# 调试
-debug = ["webrender/capture", "webrender/profiler"]
+# WebRender 调试 (依赖 window)
+wr_debug = ["window", "webrender/capture", "webrender/profiler"]
