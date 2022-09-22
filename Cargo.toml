@@ -27,8 +27,8 @@ version = "0.62.0"
 optional = true
 
 [dependencies.glw]
-#git = "https://github.com/vreui/glw.git"
-path = "../glw"
+git = "https://github.com/vreui/glw.git"
+#path = "../glw"
 version = "0.1.0"
 optional = true
 
